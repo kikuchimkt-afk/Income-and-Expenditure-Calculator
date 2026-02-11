@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  --font-family-body: 'Inter', sans-serif;
+  --color-profit-positive: #10B981;
+  --color-profit-negative: #EF4444;
+}
+
+body {
+  font-family: var(--font-family-body);
+}
+
+.profit-positive {
+  color: var(--color-profit-positive);
+}
+
+@media print {
+  @page {
+    size: landscape;
+    margin: 10mm;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background-color: white !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

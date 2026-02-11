@@ -28,12 +28,12 @@ export default function RevenueInput({ onAddRevenue, onAddBulkRevenues, masterDa
     };
 
     const handleDownloadTemplate = () => {
-        const headers = ["氏名", "学年", "週コマ数(数字のみ)", "プレミア(あり/なし)", "グループレッスン(あり/なし)"];
+        const headers = ["氏名", "学年-週コマ数", "プレミア(あり/なし)", "グループレッスン(あり/なし)"];
         const rows = [
             headers.join(','),
-            "山田 太郎,中1,2,なし,なし",
-            "鈴木 花子,中2,1,あり,なし",
-            "佐藤 次郎,小学生,2,なし,あり"
+            "山田 太郎,中1-2,なし,なし",
+            "鈴木 花子,中2-1,あり,なし",
+            "佐藤 次郎,小学生-2,なし,あり"
         ];
         const csvString = rows.join('\r\n');
         const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
@@ -61,15 +61,30 @@ export default function RevenueInput({ onAddRevenue, onAddBulkRevenues, masterDa
 
             for (let i = startIndex; i < rows.length; i++) {
                 const cols = rows[i].split(',');
-                if (cols.length < 3) continue;
+                if (cols.length < 2) continue;
 
-                // Format: Name, Grade, Lessons, Premier, Group
-                const rowName = cols[0].trim(); // Get Name
-                const rowGrade = cols[1].trim();
-                const rowLessons = parseInt(cols[2].trim());
-                const rowPremierStr = cols[3] ? cols[3].trim() : "";
+                // Format: Name, Grade-Lessons, Premier, Group
+                const rowName = cols[0].trim();
+
+                // Parse "Grade-Lessons" (e.g., "中3-2")
+                const gradeInfo = cols[1].trim();
+                let rowGrade = "";
+                let rowLessons = NaN;
+
+                if (gradeInfo.includes('-')) {
+                    const parts = gradeInfo.split('-');
+                    rowGrade = parts[0].trim();
+                    rowLessons = parseInt(parts[1].trim());
+                } else {
+                    // Fallback or Error if format is wrong
+                    // Assume maybe just Grade is provided? Or fail.
+                    // For now, let's treat it as grade only and fail lessons check
+                    rowGrade = gradeInfo;
+                }
+
+                const rowPremierStr = cols[2] ? cols[2].trim() : "";
                 const rowIsPremier = rowPremierStr === "あり" || rowPremierStr === "TRUE" || rowPremierStr === "1";
-                const rowGroupStr = cols[4] ? cols[4].trim() : "";
+                const rowGroupStr = cols[3] ? cols[3].trim() : "";
                 const rowIsGroup = rowGroupStr === "あり" || rowGroupStr === "TRUE" || rowGroupStr === "1";
 
                 // Validation
@@ -79,7 +94,7 @@ export default function RevenueInput({ onAddRevenue, onAddBulkRevenues, masterDa
                     continue;
                 }
                 if (isNaN(rowLessons)) {
-                    console.warn(`Invalid lessons at row ${i + 1}: ${cols[2]}`);
+                    console.warn(`Invalid lessons at row ${i + 1}: ${cols[1]}`);
                     errorCount++;
                     continue;
                 }

@@ -28,12 +28,12 @@ export default function RevenueInput({ onAddRevenue, onAddBulkRevenues, masterDa
     };
 
     const handleDownloadTemplate = () => {
-        const headers = ["氏名", "学年(中3-2など)", "プレミア", "グループ"];
+        const headers = ["氏名", "学年-週コマ数", "週コマ数", "プレミア(金額等)", "グループ(金額等)"];
         const rows = [
             headers.join(','),
-            "山田 太郎,中1-2,なし,なし",
-            "鈴木 花子,中2,あり,なし",
-            "佐藤 次郎,小学生-2,なし,あり"
+            "山田 太郎,中1-2,,4000,なし",
+            "鈴木 花子,中2,1,あり,8000",
+            "佐藤 次郎,小学生-2,,,あり"
         ];
         const csvString = rows.join('\r\n');
         const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
@@ -59,34 +59,93 @@ export default function RevenueInput({ onAddRevenue, onAddBulkRevenues, masterDa
             const newItems = [];
             let errorCount = 0;
 
+            // Helper to check flag (allow numbers, "あり", "TRUE", etc. as true; empty, "なし", "0" as false)
+            const checkFlag = (val) => {
+                if (!val) return false;
+                const str = val.trim();
+                // Common falsy values including "0" and "0.0"
+                if (str === "" || str === "なし" || str === "FALSE" || str === "0" || str.toLowerCase() === "null") {
+                    return false;
+                }
+                const num = parseFloat(str);
+                // If it's a number and approx 0, return false
+                if (!isNaN(num) && Math.abs(num) < 0.000001) {
+                    return false;
+                }
+                // Otherwise (non-zero number, "あり", "TRUE", etc.) return true
+                return true;
+            };
+
             for (let i = startIndex; i < rows.length; i++) {
                 const cols = rows[i].split(',');
                 if (cols.length < 2) continue;
 
-                // Format: Name, GradeInfo, Premier, Group
+                // 1. Identify Content Columns
+                // Basic: Name(0), GradeInfo(1)
                 const rowName = cols[0].trim();
                 const gradeInfo = cols[1].trim();
 
                 let rowGrade = "";
-                let rowLessons = 1; // Default to 1 if not specified
+                let rowLessons = 1;
 
+                // Parse GradeInfo
                 if (gradeInfo.includes('-')) {
                     const parts = gradeInfo.split('-');
                     rowGrade = parts[0].trim();
-                    const parsedLessons = parseInt(parts[1].trim());
-                    if (!isNaN(parsedLessons) && parsedLessons > 0) {
-                        rowLessons = parsedLessons;
-                    }
+                    const parsed = parseInt(parts[1].trim());
+                    if (!isNaN(parsed) && parsed > 0) rowLessons = parsed;
                 } else {
                     rowGrade = gradeInfo;
                 }
 
-                // Columns 3 and 4 are fixed for Premier and Group
-                const rowPremierStr = cols[2] ? cols[2].trim() : "";
-                const rowGroupStr = cols[3] ? cols[3].trim() : "";
+                // Normalize Elementary Grades (小1~小6 -> 小学生)
+                if (/^小[1-6１-６]$/.test(rowGrade)) {
+                    rowGrade = "小学生";
+                }
 
-                const rowIsPremier = rowPremierStr === "あり" || rowPremierStr === "TRUE" || rowPremierStr === "1";
-                const rowIsGroup = rowGroupStr === "あり" || rowGroupStr === "TRUE" || rowGroupStr === "1";
+                // 2. Identify Premier/Group Columns based on structure
+                // We assume if col 2 is "Lessons" (numeric/empty), then Premier is 3, Group is 4.
+                // Otherwise Premier is 2, Group is 3.
+
+                let valCol2 = cols[2] ? cols[2].trim() : "";
+
+                // Heuristic: Is col2 specific "Lessons" column?
+                // It is if:
+                // a) We have >= 4 columns AND
+                // b) col2 is a small number (e.g. < 10) OR empty, but explicitly NOT a large currency amount or "あり/なし"
+                // Actually, simpler heuristic for the user's specific request:
+                // If template has "週コマ数" column (3rd col), we should support it.
+                // Let's assume 5-column format if possible.
+
+                let premierIdx = 2;
+                let groupIdx = 3;
+
+                // If cols len >= 5, likely [Name, GradeInfo, Lessons, Premier, Group]
+                // Or if cols[2] looks like a transparent lessons column (empty or small digit) and NOT 'あり/4000'
+                const isLikelyLessonCol = (str) => {
+                    if (str === "") return true;
+                    // If it's a small integer, likely lessons. If large number, likely premier fee.
+                    const n = parseInt(str);
+                    if (!isNaN(n) && n < 20) return true; // 20 lessons/week max?
+                    return false;
+                };
+
+                if (cols.length >= 5 || (cols.length === 4 && isLikelyLessonCol(valCol2) && !checkFlag(valCol2))) {
+                    // Shift indices
+                    // Check if we need to pick lessons from here (override/fallback)
+                    if (valCol2 !== "" && !gradeInfo.includes('-')) {
+                        const l = parseInt(valCol2);
+                        if (!isNaN(l) && l > 0) rowLessons = l;
+                    }
+                    premierIdx = 3;
+                    groupIdx = 4;
+                }
+
+                const rowPremierStr = cols[premierIdx] || "";
+                const rowGroupStr = cols[groupIdx] || "";
+
+                const rowIsPremier = checkFlag(rowPremierStr);
+                const rowIsGroup = checkFlag(rowGroupStr);
 
                 // Validation
                 if (!GRADE_ORDER.includes(rowGrade)) {

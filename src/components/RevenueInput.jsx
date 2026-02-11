@@ -28,12 +28,12 @@ export default function RevenueInput({ onAddRevenue, onAddBulkRevenues, masterDa
     };
 
     const handleDownloadTemplate = () => {
-        const headers = ["氏名", "学年", "週コマ数(数字のみ)", "プレミア(あり/なし)"];
+        const headers = ["氏名", "学年", "週コマ数(数字のみ)", "プレミア(あり/なし)", "グループレッスン(あり/なし)"];
         const rows = [
             headers.join(','),
-            "山田 太郎,中1,2,なし",
-            "鈴木 花子,中2,1,あり",
-            "佐藤 次郎,小学生,2,なし"
+            "山田 太郎,中1,2,なし,なし",
+            "鈴木 花子,中2,1,あり,なし",
+            "佐藤 次郎,小学生,2,なし,あり"
         ];
         const csvString = rows.join('\r\n');
         const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
@@ -63,12 +63,14 @@ export default function RevenueInput({ onAddRevenue, onAddBulkRevenues, masterDa
                 const cols = rows[i].split(',');
                 if (cols.length < 3) continue;
 
-                // Format: Name, Grade, Lessons, Premier
+                // Format: Name, Grade, Lessons, Premier, Group
                 const rowName = cols[0].trim(); // Get Name
                 const rowGrade = cols[1].trim();
                 const rowLessons = parseInt(cols[2].trim());
                 const rowPremierStr = cols[3] ? cols[3].trim() : "";
                 const rowIsPremier = rowPremierStr === "あり" || rowPremierStr === "TRUE" || rowPremierStr === "1";
+                const rowGroupStr = cols[4] ? cols[4].trim() : "";
+                const rowIsGroup = rowGroupStr === "あり" || rowGroupStr === "TRUE" || rowGroupStr === "1";
 
                 // Validation
                 if (!GRADE_ORDER.includes(rowGrade)) {
@@ -86,7 +88,8 @@ export default function RevenueInput({ onAddRevenue, onAddBulkRevenues, masterDa
                     studentName: rowName, // Include Name
                     grade: rowGrade,
                     lessons: rowLessons,
-                    isPremier: rowIsPremier
+                    isPremier: rowIsPremier,
+                    isGroup: rowIsGroup
                 });
             }
 

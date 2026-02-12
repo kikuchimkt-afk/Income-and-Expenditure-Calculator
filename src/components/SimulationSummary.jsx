@@ -5,7 +5,7 @@ import SummaryLogicModal from './SummaryLogicModal';
 export default function SimulationSummary({ summary, onExportCsv, items, onRemoveItem }) {
     const {
         totalRevenue, totalExpense, totalProfit, totalStudents,
-        summarySalary, summaryTransport, summaryFixed, royaltyAmount,
+        summarySalary, summaryTransport, summaryGroupLabor, summaryFixed, royaltyAmount,
         totalBaseTuition, totalMonthlyFees, totalPremierFees, totalGroupFees
     } = summary;
     const [isLogicOpen, setIsLogicOpen] = useState(false);
@@ -44,7 +44,7 @@ export default function SimulationSummary({ summary, onExportCsv, items, onRemov
                         <span className="font-semibold text-blue-500">¥{totalPremierFees.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                        <span className="text-gray-500">└ グループレッスン費</span>
+                        <span className="text-gray-500">└ グループレッスン売上</span>
                         <span className="font-semibold text-blue-500">¥{totalGroupFees.toLocaleString()}</span>
                     </div>
                 </div>
@@ -62,6 +62,10 @@ export default function SimulationSummary({ summary, onExportCsv, items, onRemov
                     <div className="flex justify-between items-center">
                         <span className="text-gray-500">└ 人件費 (交通費)</span>
                         <span className="font-semibold text-red-500">¥{summaryTransport.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-gray-500">└ グループレッスン人件費</span>
+                        <span className="font-semibold text-red-500">¥{(summaryGroupLabor || 0).toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="text-gray-500">└ その他固定費</span>

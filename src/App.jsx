@@ -426,7 +426,12 @@ function App() {
 
     const summarySalary = expenses.filter(e => e.linkedRevenueId !== undefined).reduce((sum, e) => sum + e.amount, 0);
     const summaryTransport = expenses.filter(e => e.description.startsWith('講師交通費')).reduce((sum, e) => sum + e.amount, 0);
-    const summaryFixed = expenses.filter(e => e.linkedRevenueId === undefined && !e.description.startsWith('講師交通費')).reduce((sum, e) => sum + e.amount, 0);
+    const summaryGroupLabor = expenses.filter(e => e.description.startsWith('グループレッスン人件費')).reduce((sum, e) => sum + e.amount, 0);
+    const summaryFixed = expenses.filter(e =>
+      e.linkedRevenueId === undefined &&
+      !e.description.startsWith('講師交通費') &&
+      !e.description.startsWith('グループレッスン人件費')
+    ).reduce((sum, e) => sum + e.amount, 0);
 
     // Royalty Calculation
     const royaltyAmount = Math.round(totalRevenue * (settings.royaltyRate / 100));
@@ -461,6 +466,7 @@ function App() {
       totalStudents,
       summarySalary,
       summaryTransport,
+      summaryGroupLabor, // New field
       summaryFixed,
       royaltyAmount,
       // Breakdown

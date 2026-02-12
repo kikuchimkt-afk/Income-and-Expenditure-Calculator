@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { HelpCircle } from 'lucide-react';
 import SalaryLogicModal from './SalaryLogicModal';
 
-export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExpense, onAddTransportCost }) {
+export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExpense, onUpdateFixedExpense, onAddTransportCost, onUpsertGroupExpense }) {
     const [fixedCostName, setFixedCostName] = useState('');
     const [fixedCostAmount, setFixedCostAmount] = useState('');
     const [transportCount, setTransportCount] = useState(1);
@@ -28,7 +28,11 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
         const days = parseInt(groupDays || 0);
         const total = wage * hours * days * 4; // 4 weeks
 
-        onAddFixedExpense(`グループレッスン人件費 (${days}日/週)`, total);
+        if (onUpsertGroupExpense) {
+            onUpsertGroupExpense(`グループレッスン人件費 (${days}日/週)`, total);
+        } else {
+            onAddFixedExpense(`グループレッスン人件費 (${days}日/週)`, total);
+        }
     };
 
     const handleUpdateGroupCost = () => {
@@ -37,7 +41,11 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
         const days = parseInt(groupDays || 0);
         const total = wage * hours * days * 4; // 4 weeks
 
-        onUpdateFixedExpense(`グループレッスン人件費 (${days}日/週)`, total);
+        if (onUpsertGroupExpense) {
+            onUpsertGroupExpense(`グループレッスン人件費 (${days}日/週)`, total);
+        } else {
+            onUpdateFixedExpense(`グループレッスン人件費 (${days}日/週)`, total);
+        }
     };
 
     const handleUpdateFixed = () => {

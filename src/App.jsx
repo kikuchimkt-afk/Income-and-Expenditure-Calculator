@@ -322,6 +322,22 @@ function App() {
     setNextId(nextId + 1);
   };
 
+  const upsertGroupExpense = (name, amount) => {
+    // Check if any group lesson expense exists (starts with "グループレッスン人件費")
+    const existingIndex = expenses.findIndex(e => e.description.startsWith('グループレッスン人件費'));
+
+    if (existingIndex !== -1) {
+      // Update existing
+      const newExpenses = [...expenses];
+      newExpenses[existingIndex] = { ...newExpenses[existingIndex], description: name, amount: amount };
+      setExpenses(newExpenses);
+    } else {
+      // Add new
+      setExpenses([...expenses, { id: nextId, type: 'expense', description: name, amount }]);
+      setNextId(nextId + 1);
+    }
+  };
+
   const removeItem = (id) => {
     const rev = revenues.find(r => r.id === id);
     if (rev) {
@@ -598,6 +614,7 @@ function App() {
                 onAddFixedExpense={addFixedExpense}
                 onUpdateFixedExpense={updateFixedExpense}
                 onAddTransportCost={addTransportCost}
+                onUpsertGroupExpense={upsertGroupExpense}
               />
             </div>
             <div className="lg:col-span-1">

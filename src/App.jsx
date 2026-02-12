@@ -614,12 +614,14 @@ function App() {
             </div>
             <div className="lg:col-span-1">
               <ExpenseInput
+                expenses={expenses}
                 settings={settings}
                 onUpdateSettings={updateSettings}
                 onAddFixedExpense={addFixedExpense}
                 onUpdateFixedExpense={updateFixedExpense}
                 onAddTransportCost={addTransportCost}
                 onUpsertGroupExpense={upsertGroupExpense}
+                onRemoveItem={removeItem}
               />
             </div>
             <div className="lg:col-span-1">

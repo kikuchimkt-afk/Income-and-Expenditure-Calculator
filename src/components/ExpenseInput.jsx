@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { HelpCircle } from 'lucide-react';
 import SalaryLogicModal from './SalaryLogicModal';
 
-export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExpense, onUpdateFixedExpense, onAddTransportCost, onUpsertGroupExpense }) {
+export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExpense, onUpdateFixedExpense, onAddTransportCost, onUpsertGroupExpense, expenses, onRemoveItem }) {
     const [fixedCostName, setFixedCostName] = useState('');
     const [fixedCostAmount, setFixedCostAmount] = useState('');
     const [transportCount, setTransportCount] = useState(1);
@@ -249,12 +249,43 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
                         </div>
                     </div>
                 </div>
+
+
+                {/* Registered Expenses List */}
+                <div className="pt-4 border-t">
+                    <h3 className="text-md font-semibold text-gray-700 mb-3">登録済み固定費一覧</h3>
+                    <div className="space-y-2 max-h-60 overflow-y-auto bg-gray-50 p-3 rounded-md border border-gray-200">
+                        {expenses && expenses.filter(e => e.linkedRevenueId === undefined).length === 0 ? (
+                            <p className="text-sm text-gray-400 text-center py-2">固定費は登録されていません</p>
+                        ) : (
+                            expenses && expenses
+                                .filter(e => e.linkedRevenueId === undefined) // Exclude salary linked items
+                                .map(item => (
+                                    <div key={item.id} className="flex justify-between items-center bg-white p-2 rounded border border-gray-100 shadow-sm">
+                                        <div>
+                                            <span className="text-sm font-medium text-gray-700">{item.description}</span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-sm font-bold text-red-600">¥{item.amount.toLocaleString()}</span>
+                                            <button
+                                                onClick={() => onRemoveItem(item.id)}
+                                                className="text-gray-400 hover:text-red-600 transition-colors p-1"
+                                                title="削除"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                        )}
+                    </div>
+                </div>
             </div>
 
             <SalaryLogicModal
                 isOpen={isLogicOpen}
                 onClose={() => setIsLogicOpen(false)}
             />
-        </div>
+        </div >
     );
 }

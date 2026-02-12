@@ -593,6 +593,7 @@ function App() {
             </div>
             <div className="lg:col-span-1">
               <ExpenseInput
+                settings={settings}
                 onUpdateSettings={updateSettings}
                 onAddFixedExpense={addFixedExpense}
                 onUpdateFixedExpense={updateFixedExpense}

@@ -182,17 +182,30 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
                 <div className="space-y-4">
                     <h3 className="text-md font-semibold text-gray-700">その他固定費・交通費・ロイヤリティ</h3>
 
-                    {/* ロイヤリティ設定 */}
-                    <div className="bg-orange-50 p-4 rounded-md border border-orange-200">
-                        <label className="block text-sm font-medium text-gray-800 mb-1">ロイヤリティ率 (%)</label>
-                        <p className="text-xs text-gray-500 mb-2">収入合計に対して発生するロイヤリティの割合 (5~15%)</p>
-                        <input
-                            type="number"
-                            value={settings.royaltyRate}
-                            onChange={(e) => onUpdateSettings('royaltyRate', parseInt(e.target.value))}
-                            min="0" max="100" step="1"
-                            className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                        />
+                    {/* ロイヤリティ・消費税設定 */}
+                    <div className="bg-orange-50 p-4 rounded-md border border-orange-200 space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-800 mb-1">ロイヤリティ率 (%)</label>
+                            <p className="text-xs text-gray-500 mb-2">収入合計に対して発生するロイヤリティの割合 (5~15%)</p>
+                            <input
+                                type="number"
+                                value={settings.royaltyRate}
+                                onChange={(e) => onUpdateSettings('royaltyRate', parseInt(e.target.value))}
+                                min="0" max="100" step="1"
+                                className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-800 mb-1">消費税率 (%)</label>
+                            <p className="text-xs text-gray-500 mb-2">収入合計に対して発生する消費税の割合</p>
+                            <input
+                                type="number"
+                                value={settings.salesTaxRate}
+                                onChange={(e) => onUpdateSettings('salesTaxRate', parseInt(e.target.value))}
+                                min="0" max="100" step="1"
+                                className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                            />
+                        </div>
                     </div>
 
                     <div>

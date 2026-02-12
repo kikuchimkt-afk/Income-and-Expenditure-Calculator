@@ -5,7 +5,7 @@ import SummaryLogicModal from './SummaryLogicModal';
 export default function SimulationSummary({ summary, onExportCsv, items, onRemoveItem }) {
     const {
         totalRevenue, totalExpense, totalProfit, totalStudents,
-        summarySalary, summaryTransport, summaryGroupLabor, summaryFixed, royaltyAmount,
+        summarySalary, summaryTransport, summaryGroupLabor, summaryFixed, royaltyAmount, salesTaxAmount,
         totalBaseTuition, totalMonthlyFees, totalPremierFees, totalGroupFees
     } = summary;
     const [isLogicOpen, setIsLogicOpen] = useState(false);
@@ -75,6 +75,12 @@ export default function SimulationSummary({ summary, onExportCsv, items, onRemov
                         <div className="flex justify-between items-center">
                             <span className="text-gray-500">└ ロイヤリティ</span>
                             <span className="font-semibold text-red-500">¥{royaltyAmount.toLocaleString()}</span>
+                        </div>
+                    )}
+                    {salesTaxAmount > 0 && (
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-500">└ 消費税</span>
+                            <span className="font-semibold text-red-500">¥{salesTaxAmount.toLocaleString()}</span>
                         </div>
                     )}
                 </div>

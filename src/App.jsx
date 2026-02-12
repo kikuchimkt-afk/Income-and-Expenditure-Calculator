@@ -28,8 +28,9 @@ function App() {
     premierWageRatio: 50,
     adminWagePerHour: 1200,
     royaltyRate: 0,
-    groupHourlyWage: 2500, // New setting
-    groupDailyHours: 3     // New setting
+    salesTaxRate: 0, // New setting
+    groupHourlyWage: 2500,
+    groupDailyHours: 3
   });
 
   // Date State
@@ -434,7 +435,11 @@ function App() {
 
     // Royalty Calculation
     const royaltyAmount = Math.round(totalRevenue * (settings.royaltyRate / 100));
-    const finalTotalExpense = totalExpense + royaltyAmount;
+
+    // Sales Tax Calculation
+    const salesTaxAmount = Math.round(totalRevenue * (settings.salesTaxRate / 100));
+
+    const finalTotalExpense = totalExpense + royaltyAmount + salesTaxAmount;
     const finalTotalProfit = totalRevenue - finalTotalExpense;
 
     // Revenue Breakdown
@@ -468,6 +473,7 @@ function App() {
       summaryGroupLabor, // New field
       summaryFixed,
       royaltyAmount,
+      salesTaxAmount, // New field
       // Breakdown
       totalBaseTuition,
       totalMonthlyFees,
@@ -501,6 +507,21 @@ function App() {
           description: `ロイヤリティ (${settings.royaltyRate}%)`,
           amount: royaltyAmount,
           sortKey: 200, // Put at the end
+          isSalary: false
+        });
+      }
+    }
+
+    // Add Sales Tax Item if > 0
+    if (settings.salesTaxRate > 0) {
+      const salesTaxAmount = Math.round(revenues.reduce((sum, r) => sum + r.amount, 0) * (settings.salesTaxRate / 100));
+      if (salesTaxAmount > 0) {
+        items.push({
+          id: 'salesTax',
+          type: 'expense',
+          description: `消費税 (${settings.salesTaxRate}%)`,
+          amount: salesTaxAmount,
+          sortKey: 201, // Put after royalty
           isSalary: false
         });
       }

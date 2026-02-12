@@ -303,6 +303,16 @@ function App() {
     }
   };
 
+  const updateFixedExpense = (name, amount) => {
+    const existing = expenses.find(e => e.description === name && e.linkedRevenueId === undefined && !e.description.startsWith('講師交通費'));
+    if (existing) {
+      setExpenses(expenses.map(e => e.id === existing.id ? { ...e, amount: amount } : e));
+      alert(`${name}を更新しました。`);
+    } else {
+      alert(`該当する項目(${name})が見つかりません。新規追加してください。`);
+    }
+  };
+
   const addTransportCost = (count) => {
     const totalCost = count * TRANSPORT_COST_PER_TEACHER;
     const filteredExpenses = expenses.filter(e => !e.description.startsWith('講師交通費'));
@@ -583,9 +593,9 @@ function App() {
             </div>
             <div className="lg:col-span-1">
               <ExpenseInput
-                settings={settings}
                 onUpdateSettings={updateSettings}
                 onAddFixedExpense={addFixedExpense}
+                onUpdateFixedExpense={updateFixedExpense}
                 onAddTransportCost={addTransportCost}
               />
             </div>

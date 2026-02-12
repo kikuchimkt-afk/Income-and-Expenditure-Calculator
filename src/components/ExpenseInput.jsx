@@ -31,6 +31,22 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
         onAddFixedExpense(`グループレッスン人件費 (${days}日/週)`, total);
     };
 
+    const handleUpdateGroupCost = () => {
+        const wage = parseInt(settings.groupHourlyWage || 0);
+        const hours = parseInt(settings.groupDailyHours || 3);
+        const days = parseInt(groupDays || 0);
+        const total = wage * hours * days * 4; // 4 weeks
+
+        onUpdateFixedExpense(`グループレッスン人件費 (${days}日/週)`, total);
+    };
+
+    const handleUpdateFixed = () => {
+        if (!fixedCostName || !fixedCostAmount) return;
+        onUpdateFixedExpense(fixedCostName, parseInt(fixedCostAmount));
+        setFixedCostName('');
+        setFixedCostAmount('');
+    };
+
     return (
         <div className="bg-white p-6 rounded-lg shadow-md space-y-8">
             {/* Wage Settings */}
@@ -141,6 +157,12 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
                             >
                                 追加
                             </button>
+                            <button
+                                onClick={handleUpdateGroupCost}
+                                className="bg-emerald-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-emerald-700 transition duration-300 shadow-sm h-[42px]"
+                            >
+                                再計算
+                            </button>
                         </div>
                         <p className="text-right font-bold text-green-800">
                             月額算出: {(groupDays * 4 * (settings.groupDailyHours || 3) * (settings.groupHourlyWage || 0)).toLocaleString()} 円
@@ -185,12 +207,20 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
                             className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                         />
                     </div>
-                    <button
-                        onClick={handleAddFixed}
-                        className="w-full bg-red-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-red-700 transition duration-300 shadow-sm"
-                    >
-                        固定費を追加
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleAddFixed}
+                            className="flex-1 bg-red-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-red-700 transition duration-300 shadow-sm"
+                        >
+                            固定費を追加
+                        </button>
+                        <button
+                            onClick={handleUpdateFixed}
+                            className="flex-1 bg-rose-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-rose-700 transition duration-300 shadow-sm"
+                        >
+                            更新
+                        </button>
+                    </div>
                     <hr />
                     <div className="pt-2">
                         <label className="block text-sm font-medium text-gray-600 mb-1">勤務講師数</label>

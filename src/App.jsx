@@ -323,18 +323,17 @@ function App() {
   };
 
   const upsertGroupExpense = (name, amount) => {
-    // Check if any group lesson expense exists (starts with "グループレッスン人件費")
-    const existingIndex = expenses.findIndex(e => e.description.startsWith('グループレッスン人件費'));
+    // 1. Remove ALL existing group lesson expenses
+    const filteredExpenses = expenses.filter(e => !e.description.startsWith('グループレッスン人件費'));
 
-    if (existingIndex !== -1) {
-      // Update existing
-      const newExpenses = [...expenses];
-      newExpenses[existingIndex] = { ...newExpenses[existingIndex], description: name, amount: amount };
-      setExpenses(newExpenses);
-    } else {
-      // Add new
-      setExpenses([...expenses, { id: nextId, type: 'expense', description: name, amount }]);
+    // 2. Add new if amount > 0
+    if (amount > 0) {
+      const newExpense = { id: nextId, type: 'expense', description: name, amount };
+      setExpenses([...filteredExpenses, newExpense]);
       setNextId(nextId + 1);
+    } else {
+      // If 0, just remove (update with filtered list)
+      setExpenses(filteredExpenses);
     }
   };
 

@@ -480,7 +480,7 @@ function App() {
       totalPremierFees,
       totalGroupFees
     };
-  }, [revenues, expenses, settings.royaltyRate, masterData]);
+  }, [revenues, expenses, settings, masterData]);
 
   // Combine for list
   const allItems = useMemo(() => {
@@ -528,7 +528,7 @@ function App() {
     }
 
     return items.sort((a, b) => a.sortKey - b.sortKey || a.id - b.id);
-  }, [revenues, expenses, settings.royaltyRate]);
+  }, [revenues, expenses, settings]);
 
   return (
     <>

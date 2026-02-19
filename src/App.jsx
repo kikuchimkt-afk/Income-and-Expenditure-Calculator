@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Settings, Save, Trash2, RotateCcw } from 'lucide-react';
 import RevenueInput from './components/RevenueInput';
 import ExpenseInput from './components/ExpenseInput';
@@ -17,6 +17,16 @@ import {
   TRANSPORT_COST_PER_TEACHER,
   GRADE_ORDER
 } from './data/constants';
+
+// Safe number parsers to prevent NaN
+const safeInt = (val, fallback = 0) => {
+  const n = parseInt(val);
+  return isNaN(n) ? fallback : n;
+};
+const safeFloat = (val, fallback = 0) => {
+  const n = parseFloat(val);
+  return isNaN(n) ? fallback : n;
+};
 
 function App() {
   const [revenues, setRevenues] = useState([]);
@@ -121,6 +131,7 @@ function App() {
         premierWageRatio: 50,
         adminWagePerHour: 1200,
         royaltyRate: 0,
+        salesTaxRate: 0,
         groupHourlyWage: 2500,
         groupDailyHours: 3
       });
@@ -137,7 +148,7 @@ function App() {
   };
 
   // --- Logic for Salary Calculation ---
-  const calculateSalary = (lessons, count, isPremier, currentSettings, currentMasterData) => {
+  const calculateSalary = useCallback((lessons, count, isPremier, currentSettings, currentMasterData) => {
     const { hourlyWageNormal, hourlyWagePremier, premierWageRatio, adminWagePerHour } = currentSettings;
     const { STUDENT_PER_TEACHER } = currentMasterData;
     const ratio = premierWageRatio / 100;
@@ -157,51 +168,45 @@ function App() {
 
     const adminSalaryAmount = Math.round(totalTeacherLessonsPerMonth * ADMIN_TIME_PER_LESSON_HOURS * adminWagePerHour);
     return salaryAmount + adminSalaryAmount;
-  };
-
-  // --- Recalculate Logic ---
-  const recalculateAll = () => {
-    // 1. Update Revenues
-    const updatedRevenues = revenues.map(r => {
-      // Safe check in case master data changed structure
-      const gradeData = masterData.tuitionData[r.grade];
-      const unitPrice = gradeData ? gradeData[r.lessons] : r.baseTuition;
-
-      // Dynamic Premier Fee
-      const premierFee = masterData.PREMIER_FEES[r.grade] || 0;
-      const groupFee = r.isGroup ? premierFee * 2 : 0;
-
-      let subtotal = (unitPrice * r.studentCount) + (masterData.MONTHLY_FEE * r.studentCount);
-      if (r.isPremier) {
-        subtotal += premierFee * r.studentCount;
-      }
-      if (r.isGroup) {
-        subtotal += groupFee * r.studentCount;
-      }
-      return { ...r, amount: subtotal, baseTuition: unitPrice };
-    });
-
-    setRevenues(updatedRevenues);
-
-    // 2. Update Expenses
-    setExpenses(prevExpenses => prevExpenses.map(expense => {
-      if (expense.linkedRevenueId !== undefined) {
-        const linkedRevenue = updatedRevenues.find(r => r.id === expense.linkedRevenueId);
-        if (linkedRevenue) {
-          const newAmount = calculateSalary(linkedRevenue.lessons, linkedRevenue.studentCount, linkedRevenue.isPremier, settings, masterData);
-          return { ...expense, amount: newAmount };
-        }
-      }
-      return expense;
-    }));
-  };
+  }, []);
 
   // Trigger recalculation when Master Data or Settings change
+  // Uses callback form of setState to avoid stale closure
   useEffect(() => {
-    if (revenues.length > 0 || expenses.length > 0) {
-      recalculateAll();
-    }
-  }, [masterData, settings]);
+    setRevenues(prevRevenues => {
+      if (prevRevenues.length === 0) return prevRevenues;
+
+      const updatedRevenues = prevRevenues.map(r => {
+        const gradeData = masterData.tuitionData[r.grade];
+        const unitPrice = gradeData ? gradeData[r.lessons] : r.baseTuition;
+        const premierFee = masterData.PREMIER_FEES[r.grade] || 0;
+        const groupFee = r.isGroup ? premierFee * 2 : 0;
+
+        let subtotal = (unitPrice * r.studentCount) + (masterData.MONTHLY_FEE * r.studentCount);
+        if (r.isPremier) {
+          subtotal += premierFee * r.studentCount;
+        }
+        if (r.isGroup) {
+          subtotal += groupFee * r.studentCount;
+        }
+        return { ...r, amount: subtotal, baseTuition: unitPrice };
+      });
+
+      // Also update linked expenses using the latest revenues
+      setExpenses(prevExpenses => prevExpenses.map(expense => {
+        if (expense.linkedRevenueId !== undefined) {
+          const linkedRevenue = updatedRevenues.find(r => r.id === expense.linkedRevenueId);
+          if (linkedRevenue) {
+            const newAmount = calculateSalary(linkedRevenue.lessons, linkedRevenue.studentCount, linkedRevenue.isPremier, settings, masterData);
+            return { ...expense, amount: newAmount };
+          }
+        }
+        return expense;
+      }));
+
+      return updatedRevenues;
+    });
+  }, [masterData, settings, calculateSalary]);
 
 
   // --- Handlers ---

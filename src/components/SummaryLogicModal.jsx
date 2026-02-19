@@ -32,7 +32,7 @@ export default function SummaryLogicModal({ isOpen, onClose }) {
                             発生する全ての費用の総和です。
                         </p>
                         <div className="bg-gray-50 p-4 rounded border border-gray-200 font-mono text-sm mt-2">
-                            <p className="mb-2"><strong>支出合計 = ①人件費(給与) + ②人件費(交通費) + ③その他固定費 + ④ロイヤリティ</strong></p>
+                            <p className="mb-2"><strong>支出合計 = ①人件費(給与) + ②人件費(交通費) + ③グループレッスン人件費 + ④その他固定費 + ⑤ロイヤリティ + ⑥消費税</strong></p>
                             <ul className="list-disc list-inside ml-2 space-y-1">
                                 <li>人件費(給与): 生徒追加時に自動計算される講師給与と事務給の合計</li>
                                 <li>人件費(グループ): 開講スケジュールに基づいて固定計上されるグループレッスン人件費</li>

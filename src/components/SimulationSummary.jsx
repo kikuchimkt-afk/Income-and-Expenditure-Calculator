@@ -124,7 +124,9 @@ export default function SimulationSummary({ summary, onExportCsv, items, onRemov
                                     <p className={`font-semibold ${item.type === 'revenue' ? 'text-blue-600' : 'text-red-600'}`}>
                                         {item.type === 'revenue' ? '+' : '-'}{item.amount.toLocaleString()}円
                                     </p>
-                                    <button className="text-xs text-gray-400 hover:text-gray-600" onClick={() => onRemoveItem(item.id)}>✖</button>
+                                    {typeof item.id === 'number' && (
+                                        <button className="text-xs text-gray-400 hover:text-gray-600" onClick={() => onRemoveItem(item.id)}>✖</button>
+                                    )}
                                 </div>
                             </div>
                         ))

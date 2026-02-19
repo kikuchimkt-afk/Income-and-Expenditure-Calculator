@@ -59,7 +59,7 @@ export default function SalaryLogicModal({ isOpen, onClose }) {
                         <ul className="list-disc list-inside space-y-1 text-sm">
                             <li>1レッスンは80分として計算しています。</li>
                             <li>1ヶ月は4週として計算しています。</li>
-                            <li>事務給の時給は固定(1,200円)です。</li>
+                            <li>事務給の時給は支出設定から変更可能です (デフォルト: 1,200円)。</li>
                             <li>「講師1人当生徒数」はマスタ設定 (デフォルト初期値: 2人) で変更可能です。</li>
                         </ul>
                     </section>

@@ -2,6 +2,16 @@ import React, { useState } from 'react';
 import { HelpCircle } from 'lucide-react';
 import SalaryLogicModal from './SalaryLogicModal';
 
+// Safe number parsers to prevent NaN
+const safeInt = (val, fallback = 0) => {
+    const n = parseInt(val);
+    return isNaN(n) ? fallback : n;
+};
+const safeFloat = (val, fallback = 0) => {
+    const n = parseFloat(val);
+    return isNaN(n) ? fallback : n;
+};
+
 export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExpense, onUpdateFixedExpense, onAddTransportCost, onUpsertGroupExpense, expenses, onRemoveItem }) {
     const [fixedCostName, setFixedCostName] = useState('');
     const [fixedCostAmount, setFixedCostAmount] = useState('');
@@ -11,21 +21,21 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
 
     const handleAddFixed = () => {
         if (!fixedCostName || !fixedCostAmount) return;
-        onAddFixedExpense(fixedCostName, parseInt(fixedCostAmount));
+        onAddFixedExpense(fixedCostName, safeInt(fixedCostAmount, 0));
         setFixedCostName('');
         setFixedCostAmount('');
     };
 
     const handleAddTransport = () => {
         if (transportCount <= 0) return;
-        onAddTransportCost(parseInt(transportCount));
+        onAddTransportCost(safeInt(transportCount, 1));
         setTransportCount(1);
     };
 
     const handleAddGroupCost = () => {
-        const wage = parseInt(settings.groupHourlyWage || 0);
-        const hours = parseInt(settings.groupDailyHours || 3);
-        const days = parseInt(groupDays || 0);
+        const wage = safeInt(settings.groupHourlyWage, 0);
+        const hours = safeFloat(settings.groupDailyHours, 3);
+        const days = safeInt(groupDays, 0);
         const total = wage * hours * days * 4; // 4 weeks
 
         if (onUpsertGroupExpense) {
@@ -36,9 +46,9 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
     };
 
     const handleUpdateGroupCost = () => {
-        const wage = parseInt(settings.groupHourlyWage || 0);
-        const hours = parseInt(settings.groupDailyHours || 3);
-        const days = parseInt(groupDays || 0);
+        const wage = safeInt(settings.groupHourlyWage, 0);
+        const hours = safeFloat(settings.groupDailyHours, 3);
+        const days = safeInt(groupDays, 0);
         const total = wage * hours * days * 4; // 4 weeks
 
         if (onUpsertGroupExpense) {
@@ -50,7 +60,7 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
 
     const handleUpdateFixed = () => {
         if (!fixedCostName || !fixedCostAmount) return;
-        onUpdateFixedExpense(fixedCostName, parseInt(fixedCostAmount));
+        onUpdateFixedExpense(fixedCostName, safeInt(fixedCostAmount, 0));
         setFixedCostName('');
         setFixedCostAmount('');
     };
@@ -80,7 +90,7 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
                             <input
                                 type="number"
                                 value={settings.hourlyWageNormal}
-                                onChange={(e) => onUpdateSettings('hourlyWageNormal', parseInt(e.target.value))}
+                                onChange={(e) => onUpdateSettings('hourlyWageNormal', safeInt(e.target.value, 0))}
                                 min="0" step="50"
                                 className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                             />
@@ -90,7 +100,7 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
                             <input
                                 type="number"
                                 value={settings.hourlyWagePremier}
-                                onChange={(e) => onUpdateSettings('hourlyWagePremier', parseInt(e.target.value))}
+                                onChange={(e) => onUpdateSettings('hourlyWagePremier', safeInt(e.target.value, 0))}
                                 min="0" step="50"
                                 className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                             />
@@ -102,7 +112,7 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
                             <input
                                 type="number"
                                 value={settings.premierWageRatio}
-                                onChange={(e) => onUpdateSettings('premierWageRatio', parseInt(e.target.value))}
+                                onChange={(e) => onUpdateSettings('premierWageRatio', safeInt(e.target.value, 0))}
                                 min="0" max="100" step="5"
                                 className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                             />
@@ -112,7 +122,7 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
                             <input
                                 type="number"
                                 value={settings.adminWagePerHour}
-                                onChange={(e) => onUpdateSettings('adminWagePerHour', parseInt(e.target.value))}
+                                onChange={(e) => onUpdateSettings('adminWagePerHour', safeInt(e.target.value, 0))}
                                 min="0" step="50"
                                 className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                             />
@@ -122,7 +132,7 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
                             <input
                                 type="number"
                                 value={settings.groupHourlyWage}
-                                onChange={(e) => onUpdateSettings('groupHourlyWage', parseInt(e.target.value))}
+                                onChange={(e) => onUpdateSettings('groupHourlyWage', safeInt(e.target.value, 0))}
                                 min="0" step="50"
                                 className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                             />
@@ -132,7 +142,7 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
                             <input
                                 type="number"
                                 value={settings.groupDailyHours}
-                                onChange={(e) => onUpdateSettings('groupDailyHours', parseInt(e.target.value))}
+                                onChange={(e) => onUpdateSettings('groupDailyHours', safeFloat(e.target.value, 3))}
                                 min="0" step="0.5"
                                 className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                             />
@@ -173,7 +183,7 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
                             </button>
                         </div>
                         <p className="text-right font-bold text-green-800">
-                            月額算出: {(groupDays * 4 * (settings.groupDailyHours || 3) * (settings.groupHourlyWage || 0)).toLocaleString()} 円
+                            月額算出: {(safeInt(groupDays, 0) * 4 * safeFloat(settings.groupDailyHours, 3) * safeInt(settings.groupHourlyWage, 0)).toLocaleString()} 円
                         </p>
                     </div>
                 </div>
@@ -190,7 +200,7 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
                             <input
                                 type="number"
                                 value={settings.royaltyRate}
-                                onChange={(e) => onUpdateSettings('royaltyRate', parseInt(e.target.value))}
+                                onChange={(e) => onUpdateSettings('royaltyRate', safeInt(e.target.value, 0))}
                                 min="0" max="100" step="1"
                                 className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                             />
@@ -201,7 +211,7 @@ export default function ExpenseInput({ settings, onUpdateSettings, onAddFixedExp
                             <input
                                 type="number"
                                 value={settings.salesTaxRate}
-                                onChange={(e) => onUpdateSettings('salesTaxRate', parseInt(e.target.value))}
+                                onChange={(e) => onUpdateSettings('salesTaxRate', safeInt(e.target.value, 0))}
                                 min="0" max="100" step="1"
                                 className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                             />

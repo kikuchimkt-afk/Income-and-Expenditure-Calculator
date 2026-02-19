@@ -3,7 +3,7 @@ import React from 'react';
 export default function PrintReport({ summary, revenues, expenses, targetYear, targetMonth, masterData }) {
     const {
         totalRevenue, totalExpense, totalProfit, totalStudents,
-        summarySalary, summaryTransport, summaryFixed, royaltyAmount,
+        summarySalary, summaryTransport, summaryGroupLabor, summaryFixed, royaltyAmount, salesTaxAmount,
         totalBaseTuition, totalMonthlyFees, totalPremierFees, totalGroupFees
     } = summary;
 
@@ -70,10 +70,22 @@ export default function PrintReport({ summary, revenues, expenses, targetYear, t
                             <span>その他固定費</span>
                             <span>¥{summaryFixed.toLocaleString()}</span>
                         </div>
+                        {(summaryGroupLabor || 0) > 0 && (
+                            <div className="flex justify-between">
+                                <span>グループレッスン人件費</span>
+                                <span>¥{(summaryGroupLabor || 0).toLocaleString()}</span>
+                            </div>
+                        )}
                         {royaltyAmount > 0 && (
                             <div className="flex justify-between">
                                 <span>ロイヤリティ</span>
                                 <span>¥{royaltyAmount.toLocaleString()}</span>
+                            </div>
+                        )}
+                        {(salesTaxAmount || 0) > 0 && (
+                            <div className="flex justify-between">
+                                <span>消費税</span>
+                                <span>¥{(salesTaxAmount || 0).toLocaleString()}</span>
                             </div>
                         )}
                     </div>
